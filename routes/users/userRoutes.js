@@ -1,4 +1,5 @@
 const express = require('express');
+const isLogin = require('../../middlewares/isLogin');
 
 const {
     userRegisterCtrl,
@@ -18,7 +19,7 @@ userRouter.post('/register', userRegisterCtrl);
 userRouter.post('/login', userLoginCtrl);
 
 //GET /api/v1/users/profile/:id
-userRouter.get('/profile/:id', userProfileCtrl);
+userRouter.get('/profile/', isLogin, userProfileCtrl);
 
 //GET /api/v1/users
 userRouter.get('/', usersCtrls);

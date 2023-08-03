@@ -1,7 +1,10 @@
 const User = require('../../model/User/User')
 const bcrypt = require('bcryptjs')
+const generateToken = require('../../utils/generateToken')
+const getTokenFromHeader = require('../../utils/getTokenFromHeader')
+const {appErr , AppErr}= require('../../utils/appErr')
 
-const userRegisterCtrl = async (req, res) => {
+const userRegisterCtrl = async (req, res,next) => {
     const { firstname, lastname, email, password } = req.body
     try {
 
@@ -9,10 +12,7 @@ const userRegisterCtrl = async (req, res) => {
         const userFound = await User.findOne({ email });
 
         if (userFound) {
-            return res.json({
-                status: 'fail',
-                message: 'User already exist'
-            })
+            return next(new AppErr('User already exist', 500));
         }
 
         //hash user password
@@ -33,7 +33,7 @@ const userRegisterCtrl = async (req, res) => {
             data: user,
         })
     } catch (error) {
-        res.json(error.message)
+        next(appErr(error.message));
     }
 }
 
@@ -61,7 +61,13 @@ const userLoginCtrl = async (req, res) => {
 
         res.json({
             status: 'success',
-            data: userFound,
+            data: {
+                firstname: userFound.firstname,
+                lastname: userFound.lastname,
+                email: userFound.email,
+                isAdmin: userFound.isAdmin,
+                token: generateToken(userFound._id)
+            },
         })
     } catch (error) {
         res.json({
@@ -72,9 +78,12 @@ const userLoginCtrl = async (req, res) => {
 }
 
 const userProfileCtrl = async (req, res) => {
-    const { id } = req.params
+    //console.log(req.userAuth)
+    //const { id } = req.params
     try {
-        const user = await User.findById(id);
+        //const token = getTokenFromHeader(req);
+        //console.log(token);
+        const user = await User.findById(req.userAuth);
         res.json({
             status: 'success',
             data: user
