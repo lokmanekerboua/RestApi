@@ -37,6 +37,8 @@ app.use(process.env.USER_BASE_PATH, userRouter);
 //PUT /api/v1/users/:id
 app.use(process.env.USER_BASE_PATH, userRouter);
 
+//post /api/v1/users/profile-photo-upload
+app.use(process.env.USER_BASE_PATH, userRouter);
 
 
 
