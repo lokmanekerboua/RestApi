@@ -2,6 +2,7 @@ const express = require('express');
 const isLogin = require('../../middlewares/isLogin');
 const storage = require('../../config/cloudinary');
 const multer = require('multer');
+const isAdmin = require('../../middlewares/isAdmin');
 
 //instance of multer
 const upload = multer({ storage });
@@ -11,6 +12,11 @@ const {
     userLoginCtrl,
     whoViewedMyProfileCtrl,
     followingCtrls,
+    unfollowingCtrls,
+    blockUserCtrl,
+    unblockUserCtrl,
+    adminBlockUserCtrl,
+    adminUnblockUserCtrl,
     usersCtrls,
     deleteUserCtrl,
     updateUserCtrl,
@@ -28,8 +34,23 @@ userRouter.post('/login', userLoginCtrl);
 //GET /api/v1/users/profile-viewers/:id
 userRouter.get('/profile-viewers/:id', isLogin, whoViewedMyProfileCtrl);
 
-//Following user 
-userRouter.get('/following/:id',isLogin, followingCtrls);
+//Following user : /api/v1/users/following/:id
+userRouter.get('/following/:id', isLogin, followingCtrls);
+
+//Unfollowing user : /api/v1/users/unfollowing/:id
+userRouter.get('/unfollowing/:id', isLogin, unfollowingCtrls);
+
+//Block user : /api/v1/users/block/:id
+userRouter.get('/block/:id', isLogin, blockUserCtrl);
+
+//unBlock user : /api/v1/users/block/:id
+userRouter.get('/unblock/:id', isLogin, unblockUserCtrl);
+
+//Admin Block user : /api/v1/users/adminblock/:id
+userRouter.put('/adminblock/:id', isLogin, isAdmin, adminBlockUserCtrl);
+
+//Admin unBlock user : /api/v1/users/adminunblock/:id
+userRouter.put('/adminunblock/:id', isLogin, isAdmin, adminUnblockUserCtrl);
 
 //GET /api/v1/users/profile/:id
 userRouter.get('/profile/', isLogin, userProfileCtrl);

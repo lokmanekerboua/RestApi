@@ -1,9 +1,10 @@
 const { appErr } = require("../utils/appErr");
 const getTokenFromHeader = require("../utils/getTokenFromHeader");
 const verifyToken = require("../utils/verifyToken");
+const User = require("../model/User/User");
 
 
-const isLogin = async (req, res, next) => {
+const isAdmin = async (req, res, next) => {
     //get token from header
     const token = getTokenFromHeader(req);
 
@@ -13,6 +14,14 @@ const isLogin = async (req, res, next) => {
     //save the user to req object
     req.userAuth = decodedUser.id;
 
+    //find the user in db 
+    const user = await User.findById(req.userAuth);
+
+    //check if admin
+    if (!user.isAdmin) {
+        return next(appErr('You are not the ADMIN to perform this action', 403));
+    }
+
     if (!decodedUser) {
         return next(appErr('Invalid/expired token please logi again', 500));
     } else {
@@ -21,4 +30,4 @@ const isLogin = async (req, res, next) => {
 
 }
 
-module.exports = isLogin;
+module.exports = isAdmin;

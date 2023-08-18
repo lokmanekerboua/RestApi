@@ -1,4 +1,5 @@
 const express = require('express');
+const isLogin = require('../../middlewares/isLogin');
 
 const {
     createPostCtrl,
@@ -9,7 +10,7 @@ const {
 
 const postRouter = express.Router();
 
-postRouter.post('/', createPostCtrl);
+postRouter.post('/', isLogin, createPostCtrl);
 
 postRouter.get('/:id', postCtrl);
 

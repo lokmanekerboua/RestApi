@@ -5,6 +5,7 @@ const commentRouter = require('./routes/comments/commentsRoutes');
 const categoryRouter = require('./routes/categories/categoriesRoutes');
 const bodyParser = require('body-parser');
 const globalErrHandler = require('./middlewares/globalErrHandler');
+
 //hna installina (npm i dotenv) bech na9der n7ot les variables d'environnement fi fichier .env w na9der naccedilo mn fichier server.js
 // const dotenv = require('dotenv');
 // dotenv.config();
@@ -95,10 +96,10 @@ app.use(process.env.CATEGORY_BASE_PATH, categoryRouter);
 app.use(globalErrHandler);
 
 //404 error handler
-app.use('*', (req , res) => {
+app.use('*', (req, res) => {
     console.log(req.originalUrl);
     res.status(404).json({
-        message : 'Route not found'
+        message: 'Route not found'
     });
 });
 
