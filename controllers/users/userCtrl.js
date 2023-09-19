@@ -2,15 +2,17 @@ const User = require('../../model/User/User')
 const bcrypt = require('bcryptjs')
 const generateToken = require('../../utils/generateToken')
 const getTokenFromHeader = require('../../utils/getTokenFromHeader')
-const { appErr, AppErr } = require('../../utils/appErr')
+const {appErr, AppErr} = require('../../utils/appErr')
+const Post = require('../../model/Post/Post')
+const Category = require('../../model/Category/Category')
+const Comment = require('../../model/Comments/Comments')
 
 //POST /api/v1/users/register
 const userRegisterCtrl = async (req, res, next) => {
-    const { firstname, lastname, email, password } = req.body
+    const {firstname, lastname, email, password} = req.body
     try {
-
         //check if email exist 
-        const userFound = await User.findOne({ email });
+        const userFound = await User.findOne({email});
 
         if (userFound) {
             return next(new AppErr('User already exist', 500));
@@ -39,26 +41,20 @@ const userRegisterCtrl = async (req, res, next) => {
 }
 
 //POST /api/v1/users/login
-const userLoginCtrl = async (req, res) => {
-    const { email, password } = req.body
+const userLoginCtrl = async (req, res, next) => {
+    const {email, password} = req.body
     try {
         //check if email exist
-        const userFound = await User.findOne({ email });
+        const userFound = await User.findOne({email});
 
         if (!userFound) {
-            return res.json({
-                status: 'fail',
-                message: 'Invalid login creadentials'
-            })
+            return next(appErr("Invalid login creadentials"))
         }
 
         const ispasswordMatch = await bcrypt.compare(password, userFound.password);
 
         if (!ispasswordMatch) {
-            return res.json({
-                status: 'fail',
-                message: 'Invalid login creadentials'
-            })
+            return next(appErr("Invalid login creadentials"))
         }
 
         res.json({
@@ -72,10 +68,7 @@ const userLoginCtrl = async (req, res) => {
             },
         })
     } catch (error) {
-        res.json({
-            status: 'fail',
-            message: error.message
-        })
+        return next(appErr(error.message));
     }
 }
 
@@ -97,8 +90,7 @@ const whoViewedMyProfileCtrl = async (req, res, next) => {
 
             if (isuserAlreadyViewed) {
                 return next(new AppErr("You have already viewed this profile"));
-            }
-            else {
+            } else {
                 //5. Push the userwhoviewed to the original user viewers array
                 user.viewers.push(userWhoviewed._id);
                 //6. save the original user
@@ -113,7 +105,7 @@ const whoViewedMyProfileCtrl = async (req, res, next) => {
             }
         }
     } catch (error) {
-        res.json(error.message)
+        return next(appErr(error.message))
     }
 }
 
@@ -156,7 +148,7 @@ const followingCtrls = async (req, res, next) => {
 
 
     } catch (error) {
-        res.json(error.message)
+        return next(appErr(error.message))
     }
 }
 
@@ -203,7 +195,7 @@ const unfollowingCtrls = async (req, res, next) => {
 
 
     } catch (error) {
-        res.json(error.message)
+        return next(appErr(error.message))
     }
 }
 
@@ -241,7 +233,7 @@ const blockUserCtrl = async (req, res, next) => {
 
 
     } catch (error) {
-        res.json(error.message)
+        return next(appErr(error.message))
     }
 }
 
@@ -279,7 +271,7 @@ const unblockUserCtrl = async (req, res, next) => {
             }
         }
     } catch (error) {
-        res.json(error.message)
+        return next(appErr(error.message))
     }
 }
 
@@ -305,7 +297,7 @@ const adminBlockUserCtrl = async (req, res, next) => {
             data: 'Admin successfully blocked user'
         })
     } catch (error) {
-        res.json(error.message)
+        return next(appErr(error.message));
     }
 }
 
@@ -331,7 +323,7 @@ const adminUnblockUserCtrl = async (req, res, next) => {
             data: 'Admin successfully unblocked user'
         })
     } catch (error) {
-        res.json(error.message)
+        return next(appErr(error.message));
     }
 }
 
@@ -348,12 +340,12 @@ const userProfileCtrl = async (req, res) => {
             data: user
         })
     } catch (error) {
-        res.json(error.message)
+        return next(appErr(error.message));
     }
 }
 
 //GET all users
-const usersCtrls = async (req, res) => {
+const usersCtrls = async (req, res, next) => {
     try {
         const users = await User.find();
         res.json({
@@ -361,31 +353,96 @@ const usersCtrls = async (req, res) => {
             data: users
         })
     } catch (error) {
-        res.json(error.message)
-    }
-}
-
-//DELETE user
-const deleteUserCtrl = async (req, res) => {
-    try {
-        res.json({
-            status: 'success',
-            data: 'delete user route'
-        })
-    } catch (error) {
-        res.json(error.message)
+        return next(appErr(error.message))
     }
 }
 
 //UPDATE user
-const updateUserCtrl = async (req, res) => {
+const updateUserCtrl = async (req, res, next) => {
+    const {email, lastname, firstname} = req.body;
     try {
+        if (email) {
+            const emailTaken = await User.findOne({email});
+            if (emailTaken) {
+                return next(new AppErr('Email already taken', 400));
+            }
+        }
+
+        //update the user
+        const user = await User.findByIdAndUpdate(req.userAuth, {
+                lastname,
+                firstname,
+                email,
+            },
+            {
+                new: true,
+                runValidators: true,
+            })
+        //send response
         res.json({
             status: 'success',
-            data: 'update user route'
+            data: user
         })
     } catch (error) {
-        res.json(error.message)
+        return next(appErr(error.message))
+    }
+}
+
+//UPDATE password
+const updatePassword = async (req, res, next) => {
+    const {password} = req.body;
+    try {
+        //check if user is updating their password
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+            //update the user
+            await User.findByIdAndUpdate(
+                req.userAuth,
+                {
+                    password: hashedPassword
+                },
+                {
+                    new: true,
+                    runValidators: true,
+                });
+
+            res.json({
+                status: 'success',
+                data: 'password updated'
+            });
+        } else {
+            return next(appErr('password is required'));
+        }
+    } catch (error) {
+        return next(appErr(error.message))
+    }
+}
+
+//DELETE ACCOUNT
+const deleteUserAccount = async (req, res, next) => {
+    try {
+        //find user to be deleted
+        const userToDelete = await User.findById(req.userAuth);
+
+        //find all posts by user to be deleted
+        await Post.deleteMany({user: req.userAuth});
+
+        //delete all comments by user to be deleted
+        await Comment.deleteMany({user: req.userAuth});
+
+        //delete all categories by user to be deleted
+        await Category.deleteMany({user: req.userAuth});
+
+        //delete the user
+        await userToDelete.deleteOne();
+
+        return res.json({
+            status: 'success',
+            data: ("your account has been deleted")
+        });
+    } catch (error) {
+        return next(appErr(error.message))
     }
 }
 
@@ -434,8 +491,8 @@ module.exports = {
     userLoginCtrl,
     userProfileCtrl,
     usersCtrls,
-    deleteUserCtrl,
     updateUserCtrl,
+    updatePassword,
     profilePhotoUpload,
     whoViewedMyProfileCtrl,
     followingCtrls,
@@ -443,5 +500,6 @@ module.exports = {
     blockUserCtrl,
     unblockUserCtrl,
     adminBlockUserCtrl,
-    adminUnblockUserCtrl
+    adminUnblockUserCtrl,
+    deleteUserAccount
 }

@@ -5,7 +5,7 @@ const multer = require('multer');
 const isAdmin = require('../../middlewares/isAdmin');
 
 //instance of multer
-const upload = multer({ storage });
+const upload = multer({storage});
 
 const {
     userRegisterCtrl,
@@ -18,10 +18,12 @@ const {
     adminBlockUserCtrl,
     adminUnblockUserCtrl,
     usersCtrls,
-    deleteUserCtrl,
     updateUserCtrl,
+    updatePassword,
     userProfileCtrl,
-    profilePhotoUpload } = require('../../controllers/users/userCtrl');
+    profilePhotoUpload,
+    deleteUserAccount
+} = require('../../controllers/users/userCtrl');
 
 const userRouter = express.Router();
 
@@ -58,13 +60,16 @@ userRouter.get('/profile/', isLogin, userProfileCtrl);
 //GET /api/v1/users
 userRouter.get('/', usersCtrls);
 
-//DELETE /api/v1/users/:id
-userRouter.delete('/:id', deleteUserCtrl);
-
 //PUT /api/v1/users/:id
-userRouter.put('/:id', updateUserCtrl);
+userRouter.put('/', isLogin, updateUserCtrl);
 
-//POST /api/v1/users/profile-photo-upload
+//UPDATE PASSWORD /api/v1/users/update-password
+userRouter.put("/update-password", isLogin, updatePassword);
+
+//DELETE USER ACCOUNT /api/v1/users/delete-account
+userRouter.delete("/delete/account", isLogin, deleteUserAccount);
+
+//POST /api/v1/users/profile-photo-upload/
 userRouter.post('/profile-photo-upload', isLogin, upload.single("profile"), profilePhotoUpload);
 
 module.exports = userRouter;

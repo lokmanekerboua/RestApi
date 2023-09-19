@@ -1,7 +1,8 @@
 const Post = require('../../model/Post/Post')
 const User = require('../../model/User/User')
+const {appErr} = require("../../utils/appErr");
 
-const createPostCtrl = async (req, res) => {
+const createPostCtrl = async (req, res, next) => {
     try {
         const { title, description } = req.body;
         //find the user 
@@ -23,10 +24,7 @@ const createPostCtrl = async (req, res) => {
             data: postcreated,
         })
     } catch (error) {
-        res.json({
-            status: 'fail',
-            message: error.message
-        })
+        return next(appErr(error.message));
     }
 }
 

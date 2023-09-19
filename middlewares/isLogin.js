@@ -14,7 +14,7 @@ const isLogin = async (req, res, next) => {
     req.userAuth = decodedUser.id;
 
     if (!decodedUser) {
-        return next(appErr('Invalid/expired token please logi again', 500));
+        return next(appErr('Invalid/expired token please login again', 500));
     } else {
         next();
     }

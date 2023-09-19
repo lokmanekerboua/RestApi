@@ -23,23 +23,23 @@ app.use(bodyParser.json());
 //POST /api/v1/users/register
 app.use(process.env.USER_BASE_PATH, userRouter);
 
-//POST /api/v1/users/login
-app.use(process.env.USER_BASE_PATH, userRouter);
-
-//GET /api/v1/users/profile/:id
-app.use(process.env.USER_BASE_PATH, userRouter);
-
-//GET /api/v1/users
-app.use(process.env.USER_BASE_PATH, userRouter);
-
-//DELETE /api/v1/users/:id
-app.use(process.env.USER_BASE_PATH, userRouter);
-
-//PUT /api/v1/users/:id
-app.use(process.env.USER_BASE_PATH, userRouter);
-
-//post /api/v1/users/profile-photo-upload
-app.use(process.env.USER_BASE_PATH, userRouter);
+// //POST /api/v1/users/login
+// app.use(process.env.USER_BASE_PATH, userRouter);
+//
+// //GET /api/v1/users/profile/:id
+// app.use(process.env.USER_BASE_PATH, userRouter);
+//
+// //GET /api/v1/users
+// app.use(process.env.USER_BASE_PATH, userRouter);
+//
+// //DELETE /api/v1/users/:id
+// app.use(process.env.USER_BASE_PATH, userRouter);
+//
+// //PUT /api/v1/users/:id
+// app.use(process.env.USER_BASE_PATH, userRouter);
+//
+// //post /api/v1/users/profile-photo-upload
+// app.use(process.env.USER_BASE_PATH, userRouter);
 
 
 
