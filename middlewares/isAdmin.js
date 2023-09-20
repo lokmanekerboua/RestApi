@@ -23,7 +23,7 @@ const isAdmin = async (req, res, next) => {
     }
 
     if (!decodedUser) {
-        return next(appErr('Invalid/expired token please logi again', 500));
+        return next(appErr('Invalid/expired token please login again', 500));
     } else {
         next();
     }

@@ -1,19 +1,18 @@
 const express = require('express');
+const isLogin = require('../../middlewares/isLogin');
 
 const {
     addcommentCtrl,
-    getcommentCtrl,
     deletecommentCtrl,
-    updatecommentCtrl } = require('../../controllers/comments/commentsCtrl');
+    updatecommentCtrl
+} = require('../../controllers/comments/commentsCtrl');
 
 const commentRouter = express.Router();
 
-commentRouter.post('/', addcommentCtrl);
+commentRouter.post('/:id', isLogin, addcommentCtrl);
 
-commentRouter.get('/:id', getcommentCtrl);
+commentRouter.delete('/:id', isLogin, deletecommentCtrl);
 
-commentRouter.delete('/:id', deletecommentCtrl);
-
-commentRouter.put('/:id', updatecommentCtrl);
+commentRouter.put('/:id', isLogin, updatecommentCtrl);
 
 module.exports = commentRouter;

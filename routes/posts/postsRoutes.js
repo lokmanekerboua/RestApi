@@ -1,23 +1,38 @@
 const express = require('express');
 const isLogin = require('../../middlewares/isLogin');
-
+const multer = require('multer');
+const storage = require('../../config/cloudinary');
 const {
     createPostCtrl,
     postCtrl,
     allPostsCtrl,
+    toggleLikesPostCtrl,
+    toggleDisLikesPostCtrl,
+    postDetailsCtrl,
     deletePostCtrl,
-    updatePostCtrl } = require('../../controllers/posts/postsCtrl');
+    updatePostCtrl
+} = require('../../controllers/posts/postsCtrl');
 
 const postRouter = express.Router();
 
-postRouter.post('/', isLogin, createPostCtrl);
+//file upload middleware
+const upload = multer({storage});
 
-postRouter.get('/:id', postCtrl);
 
-postRouter.get('/', allPostsCtrl);
+postRouter.post('/', isLogin, upload.single("image"), createPostCtrl);
 
-postRouter.delete("/:id", deletePostCtrl);
+postRouter.get('/:id', isLogin, postCtrl);
 
-postRouter.put("/:id", updatePostCtrl);
+postRouter.get('/', isLogin, allPostsCtrl);
+
+postRouter.get('/toggleLikes/:id', isLogin, toggleLikesPostCtrl);
+
+postRouter.get('/toggleDisLikes/:id', isLogin, toggleDisLikesPostCtrl);
+
+postRouter.get('/post_details/:id', isLogin, postDetailsCtrl);
+
+postRouter.delete("/:id", isLogin, deletePostCtrl);
+
+postRouter.put("/:id", isLogin, upload.single("image"), updatePostCtrl);
 
 module.exports = postRouter;
